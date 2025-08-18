@@ -1,3 +1,4 @@
+import { clearAuthToken } from '../lib/auth'
 import { useEffect, useState } from 'react'
 import api from '../lib/api'
 
@@ -24,7 +25,7 @@ const ProfilePage = () => {
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token')
+    clearAuthToken()
     window.location.href = '/login'
   }
 

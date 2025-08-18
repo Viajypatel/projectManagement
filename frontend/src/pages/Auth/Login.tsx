@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import api from '../../lib/api'
+import { setAuthToken } from '../../lib/auth'
 import { Link, useNavigate } from 'react-router-dom'
 
 const loginSchema = z.object({
@@ -29,10 +30,11 @@ const Login = () => {
     try {
       const { data } = await api.post('/api/users/login', values)
       if (data?.token) {
-        localStorage.setItem('auth_token', data.token)
+        setAuthToken(data.token)
+        navigate('/projects')
+      } else {
+        setServerError('No token returned from server')
       }
-      console.log(data);
-      navigate('/projects')
     } catch (err: any) {
       const message = err?.response?.data?.error || 'Login failed'
       setServerError(message)

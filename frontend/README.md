@@ -1,69 +1,64 @@
-# React + TypeScript + Vite
+# Project Management App (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite frontend that consumes the backend API for auth, projects, and tasks.
 
-Currently, two official plugins are available:
+## Tech stack
+- **React 19**, **TypeScript**, **Vite 7**
+- **Router**: react-router-dom
+- **Forms/Validation**: react-hook-form, zod
+- **HTTP**: axios (with auth interceptor)
+- **Styling**: Tailwind CSS
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Setup
+1. Install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Configure environment variables (optional): create `frontend/.env` with:
+   ```bash
+   VITE_API_URL=http://localhost:5000
+   ```
+   Defaults to `http://localhost:5000` if not set (see `src/lib/api.ts`).
 
-## Expanding the ESLint configuration
+## Scripts
+- `npm run dev`: start dev server with HMR
+- `npm run build`: typecheck and build production assets
+- `npm run preview`: preview the production build
+- `npm run lint`: run ESLint
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## How auth works
+- On login, the backend returns a JWT. The frontend stores it in `localStorage` under `auth_token`.
+- `src/lib/api.ts` sets `Authorization: Bearer <token>` on all requests if a token exists.
+- Helpers in `src/lib/auth.ts` manage the token and dispatch an `auth-changed` event.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## API usage from the frontend
+See typed helpers in `src/lib/`:
+- `projects.ts`: CRUD on `/api/projects`
+- `tasks.ts`: CRUD on `/api/tasks`
+- `api.ts`: axios instance with base URL and auth interceptor
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+Example:
+```ts
+import { fetchProjects, createProject } from '@/lib/projects'
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+const projects = await fetchProjects()
+await createProject({ title: 'New Project', description: 'Demo' })
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Directory structure
 ```
+frontend/
+  src/
+    lib/           # axios instance + API helpers
+    pages/         # views (Auth, Projects, Profile)
+    App.tsx        # routes
+```
+
+## Build + serve via backend (production)
+- Build the frontend:
+  ```bash
+  npm run build
+  ```
+- Start the backend with `NODE_ENV=production` to serve the built assets. Make sure the backend static path matches your build output.
+
